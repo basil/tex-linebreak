@@ -14,6 +14,10 @@ module.exports = {
     lib: './src',
     ...hyphenLibs,
   },
+  entry: {
+    common: './src/demos/common.ts',
+    lib: './src'
+  },
   devtool: 'cheap-source-map',
   module: {
     rules: [{

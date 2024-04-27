@@ -1,0 +1,73 @@
+:root {
+  --line-width: 500px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  max-width: 500px;
+  margin: auto;
+  background-color: #fdfbf7;
+  font-family: serif;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+h1 {
+  text-align: center;
+  padding-top: 20px;
+  font-weight: normal;
+}
+
+.description {
+  font-family: sans-serif;
+  margin-top: 40px;
+}
+
+.description h2 {
+  text-align: center;
+  font-size: 18px;
+}
+
+textarea {
+  width: 100%;
+  font-family: sans-serif;
+  min-height: 120px;
+}
+
+body > p {
+  font-size: 17px;
+}
+
+.demo-output {
+  background-color: white;
+  font-size: 15px;
+  border: 1px solid #aaa;
+  margin: 10px auto;
+  padding: 15px 30px;
+  max-width: calc(var(--line-width) + 40px);
+  width: 100%;
+}
+
+.canvas {
+  padding: 0;
+}
+
+.error {
+  padding: 10px;
+  font-family: sans-serif;
+  background: #c21616;
+  margin: 10px 0;
+  color: white;
+  border-radius: 3px;
+}
+
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}

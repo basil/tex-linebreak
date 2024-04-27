@@ -109,6 +109,10 @@ function isForcedBreak(item: InputItem) {
   return item.type === 'penalty' && item.cost <= MIN_COST;
 }
 
+function isBreakablePenalty(item: InputItem) {
+  return item.type === 'penalty' && item.cost < MAX_COST;
+}
+
 const defaultOptions: Options = {
   maxAdjustmentRatio: null,
   initialMaxAdjustmentRatio: 1,
@@ -185,6 +189,10 @@ export function breakLines(
     prev: null,
   });
 
+  // Breakpoints that violate one of the restrictions on p. 1156 and should
+  // therefore never be selected
+  const restricted: number[][] = [];
+
   // Sum of `width` of items up to current item.
   let sumWidth = 0;
   // Sum of `stretch` of glue items up to current item.
@@ -196,14 +204,7 @@ export function breakLines(
 
   for (let b = 0; b < items.length; b++) {
     const item = items[b];
-
-    // TeX allows items with negative widths or stretch factors but imposes two
-    // restrictions for efficiency. These restrictions are not yet implemented
-    // here and we avoid the problem by just disallowing negative
-    // width/shrink/stretch amounts.
-    if (item.width < 0) {
-      throw new Error(`Item ${b} has disallowed negative width`);
-    }
+    const isLastItem = b === items.length - 1;
 
     // Determine if this is a feasible breakpoint and update `sumWidth`,
     // `sumStretch` and `sumShrink`.
@@ -211,10 +212,6 @@ export function breakLines(
     if (item.type === 'box') {
       sumWidth += item.width;
     } else if (item.type === 'glue') {
-      if (item.shrink < 0 || item.stretch < 0) {
-        throw new Error(`Item ${b} has disallowed negative stretch or shrink`);
-      }
-
       canBreak = b > 0 && items[b - 1].type === 'box';
       if (!canBreak) {
         sumWidth += item.width;
@@ -259,6 +256,27 @@ export function breakLines(
           adjustmentRatio,
           minAdjustmentRatioAboveThreshold,
         );
+      }
+
+      // Restriction 1 (p. 1156). Let $M_b$ be the length of the minimum-length
+      // line from the beginning of the paragraph to breakpoint $b$, namely the
+      // sum of all $w_i - z_i$ taken over all box and glue items $x_i$ for $1
+      // <= i < b$, plus $w_b$ if $x_b$ is a penalty item. The paragraph must
+      // have $M_a <= M_b$ whenever $a$ and $b$ are legal breakpoints with $a <
+      // b$.
+      if (a.totalWidth > sumWidth) {
+        restricted.push([a.index, b]);
+      }
+
+      // Restriction 2 (p. 1156). Let $a$ and $b$ be legal breakpoints with $a <
+      // b$, and assume that no $x_i$ in the range $a < i < b$ is a box item or
+      // a forced break (penalty $p_i = -\infty$). Then either $b = m$, or $x_{b
+      // + 1}$ is a box item or a penalty with $p_{b + 1} < \infty$.
+      if (
+        !items.slice(a.index, b).some((i) => i.type === 'box' || isForcedBreak(i)) &&
+        !(isLastItem || items[b + 1].type === 'box' || isBreakablePenalty(items[b + 1]))
+      ) {
+        restricted.push([a.index, b]);
       }
 
       if (adjustmentRatio < MIN_ADJUSTMENT_RATIO || isForcedBreak(item)) {
@@ -408,13 +426,32 @@ export function breakLines(
 
   // Follow the chain backwards from the chosen node to get the sequence of
   // chosen breakpoints.
-  const output = [];
+  const output: number[] = [];
   let next: Node | null = bestNode!;
   while (next) {
     output.push(next.index);
     next = next.prev;
   }
   output.reverse();
+
+  // Fail if any restricted breakpoint pairs were selected.
+  const illegal = output
+    .slice(0, -1)
+    .map((value, index) => [value, output[index + 1]])
+    .filter((pair) =>
+      restricted.some(
+        (restrictedPair) => pair[0] === restrictedPair[0] && pair[1] === restrictedPair[1],
+      ),
+    );
+  if (illegal.length > 0) {
+    throw new Error(
+      `Illegal breakpoints: ${illegal
+        .flatMap((pair) => pair)
+        .sort()
+        .filter((value, index, array) => index === 0 || value !== array[index - 1])
+        .join(', ')}`,
+    );
+  }
 
   return output;
 }

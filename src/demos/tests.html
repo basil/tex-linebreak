@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Various tests</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="common.css" />
+  </head>
+  <body>
+    <h1>Tests</h1>
+    <div id="output-container">
+      <div class="description">Various tests:</div>
+      <div class="demo-output">
+        “Some <a href="#">simple text <i>with</i></a> <code>inline</code> and
+        <span style="display: inline-block; border: 1px solid gray"> inline block </span>
+        el&shy;em&shy;ents can be found in this paragraph
+        <!-- A comment node -->
+        of text <a href="#">which includes</a> <b>bold text</b>, as well as <i>italic text</i>. The
+        spaces of
+        <span style="display: inline-block; border: 1px solid gray">inline block elements</span>
+        should also expand.
+        <br />
+        <br />
+        <span style="display: inline; border: 5px solid gray">This box</span> has no padding or
+        margins.
+        <br />
+        <br />
+        <b>(Inline-</b><i>elements!</i><b>)</b> that do not have a <i>background,</i> or a border
+        have hanging punctuation.
+      </div>
+      <div class="description">Inline elements:</div>
+      <div class="demo-output">
+        <b>(Inline-</b><i>elements!</i><b>)</b> that do not have a <i>background,</i> or a border
+        have hanging punctuation.
+      </div>
+      <div class="description">Not displayed:</div>
+      <div class="demo-output">
+        <span>
+          This
+          <div style="display: none">not displayed</div>
+        </span>
+        <span>
+          text
+          <div style="position: absolute; right: 0; border: 1px solid red; font-size: smaller">
+            This element has an <br />absolute position.
+          </div>
+        </span>
+        incl
+        <div style="display: none">not displayed</div>
+        udes "display:none" and "position:absolute" elements, which should not interfere with the
+        justification.
+      </div>
+      <div class="description">Comma character:</div>
+      <div class="demo-output">
+        Bla bla bla bla bla bla. Bla bla bla bla bla bla. Before the
+        <i>comma character</i>, there should be no break.
+      </div>
+    </div>
+
+    <script src="../../dist/common.js"></script>
+  </body>
+</html>
